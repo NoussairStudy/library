@@ -69,7 +69,8 @@ nav.crumbs .here { font-weight: 600; }
   var REPO = "";
 
   var LANGS = [
-    { key: "french", name: "French", native: "Français · Французский", tab: "--tab-fr", junior: "French Junior", general: "Français Général" },
+    { key: "french", name: "French", native: "Français · Французский", tab: "--tab-fr", junior: "French Junior", general: "Français Général",
+      extras: [{ key: "tcf", name: "TCF", desc: "Test de connaissance du français" }, { key: "tef", name: "TEF", desc: "Test d'évaluation de français" }] },
     { key: "english", name: "English", native: "English · Английский", tab: "--tab-en", junior: "English Junior", general: "General English" },
     { key: "russian", name: "Russian", native: "Русский", tab: "--tab-ru", junior: "Russian Junior", general: "General Russian" },
     { key: "spanish", name: "Spanish", native: "Español · Испанский", tab: "--tab-es", junior: "Spanish Junior", general: "General Spanish" }
@@ -87,9 +88,11 @@ nav.crumbs .here { font-weight: 600; }
     var first = location.pathname.split("/").filter(Boolean)[0];
     return m[1] + "/" + (first && !/\.html?$/i.test(first) ? first : host);
   }
+  function extraOf(l, k) { var x = l && l.extras || []; for (var i = 0; i < x.length; i++) if (x[i].key === k) return x[i]; return null; }
   function langOf(k) { for (var i = 0; i < LANGS.length; i++) if (LANGS[i].key === k) return LANGS[i]; return null; }
   function placeLabel(p) {
     var s = p.split("/"), l = langOf(s[0]); if (!l) return p;
+    var x = extraOf(l, s[1]); if (x) return l.name + " · " + x.name;
     return s[1] === "junior" ? l.junior : l.general + " · " + LEVELS[Number(s[2].replace("level-", "")) - 1];
   }
   function inPlace(p) { return items.filter(function (i) { return i.place === p; }).sort(function (a, b) { return a.title.localeCompare(b.title, undefined, { numeric: true }); }); }
@@ -145,6 +148,7 @@ nav.crumbs .here { font-weight: 600; }
     parts.push([l.name, l.key]);
     if (r.section === "general") parts.push([l.general, l.key + "/general"]);
     if (r.section === "junior") parts.push([l.junior, null]);
+    var ex = extraOf(l, r.section); if (ex) parts.push([ex.name, null]);
     if (r.level) parts.push([LEVELS[Number(r.level.replace("level-", "")) - 1] || r.level, null]);
     var nav = el("nav", { class: "crumbs", "aria-label": "Breadcrumb" });
     parts.forEach(function (p, i) {
@@ -186,8 +190,10 @@ nav.crumbs .here { font-weight: 600; }
     if (!r.section) {
       app.appendChild(el("h2", null, l.name + " · " + l.native));
       app.appendChild(el("div", { class: "grid two" },
-        card(l.key + "/junior", l.tab, [el("span", { class: "name" }, l.junior), el("span", { class: "native" }, "For younger learners"), el("span", { class: "count" }, files(underPrefix(l.key + "/junior")))]),
-        card(l.key + "/general", l.tab, [el("span", { class: "name" }, l.general), el("span", { class: "native" }, LEVELS.length + " levels"), el("span", { class: "count" }, files(underPrefix(l.key + "/general/")))])));
+        [card(l.key + "/junior", l.tab, [el("span", { class: "name" }, l.junior), el("span", { class: "native" }, "For younger learners"), el("span", { class: "count" }, files(underPrefix(l.key + "/junior")))]),
+        card(l.key + "/general", l.tab, [el("span", { class: "name" }, l.general), el("span", { class: "native" }, LEVELS.length + " levels"), el("span", { class: "count" }, files(underPrefix(l.key + "/general/")))])].concat((l.extras || []).map(function (x) {
+          return card(l.key + "/" + x.key, l.tab, [el("span", { class: "name" }, x.name), el("span", { class: "native" }, x.desc), el("span", { class: "count" }, files(underPrefix(l.key + "/" + x.key)))]);
+        }))));
     } else if (r.section === "general" && !r.level) {
       app.appendChild(el("h2", null, l.general));
       app.appendChild(el("div", { class: "grid" }, LEVELS.map(function (name, i) {
@@ -195,7 +201,7 @@ nav.crumbs .here { font-weight: 600; }
         return card(p, l.tab, [el("span", { class: "levelnum", "aria-hidden": "true" }, String(i + 1)), el("span", { class: "name" }, name), el("span", { class: "count" }, files(inPlace(p).length))]);
       })));
     } else {
-      var place = r.section === "junior" ? l.key + "/junior" : l.key + "/general/" + r.level;
+      var place = (r.section === "junior" || extraOf(l, r.section)) ? l.key + "/" + r.section : l.key + "/general/" + r.level;
       app.appendChild(el("h2", null, placeLabel(place)));
       var list = el("div", { class: "list" }), found = inPlace(place);
       if (found.length) found.forEach(function (it) { list.appendChild(row(it, false)); });
