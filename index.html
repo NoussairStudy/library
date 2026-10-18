@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Language Materials Library</title>
+<style>
+/* Layout: one centered column; breadcrumb trail on top, then tabbed cards that narrow into lists of PDFs. No external files, so nothing extra has to load. */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #17222e; --muted: #5b6876; --line: #d9dfe6;
+  --accent: #1f5f8b; --accent-ink: #ffffff; --danger: #b3261e;
+  --tab-en: #2f6db5; --tab-fr: #1f5f8b; --tab-ru: #a3394a; --tab-es: #c27a12;
+  --font-display: "Avenir Next", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #10161d; --surface: #18212b; --ink: #e6edf3; --muted: #9aa8b6; --line: #2a3643;
+  --accent: #6fb0e0; --accent-ink: #0d1b27; --danger: #f2827a;
+  --tab-en: #78a8e6; --tab-fr: #6fb0e0; --tab-ru: #e08593; --tab-es: #e3a84f;
+  color-scheme: dark } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 28px 16px 64px; display: flex; flex-direction: column; gap: 24px; }
+header.top { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 6vw, 40px); line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 24px; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); margin: 0; max-width: 60ch; }
+nav.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 15px; }
+nav.crumbs a { color: var(--accent); text-underline-offset: 3px; }
+nav.crumbs .sep { color: var(--muted); }
+nav.crumbs .here { font-weight: 600; }
+.search input { width: 100%; font: inherit; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
+.search input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); }
+.grid.two { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.card { position: relative; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px 18px 18px; overflow: hidden; transition: transform .15s ease, border-color .15s ease; }
+.card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; background: var(--tab, var(--accent)); }
+.card:hover { transform: translateY(-2px); border-color: var(--tab, var(--accent)); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card .name { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1.2; }
+.card .native { color: var(--muted); }
+.card .count { margin-top: 8px; font-family: var(--font-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.card .levelnum { font-family: var(--font-display); font-size: 40px; font-weight: 700; line-height: 1; color: var(--tab, var(--accent)); }
+.list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px 16px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row .ico { flex: none; width: 34px; height: 42px; border-radius: 4px; border: 1.5px solid var(--tab, var(--accent)); color: var(--tab, var(--accent)); font-family: var(--font-mono); font-size: 10px; font-weight: 600; display: grid; place-items: end center; padding-bottom: 5px; }
+.row .info { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; }
+.row .title { font-weight: 600; overflow-wrap: anywhere; }
+.row .meta, .row .where { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: inherit; font-size: 15px; font-weight: 600; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.empty { padding: 28px 18px; text-align: center; color: var(--muted); }
+.empty.err { color: var(--danger); }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="empty">Loading…</p></div>
+
+<script>
+(function () {
+  // Optional: set to "your-name/your-repo" if the site is not on github.io. Leave empty to detect it automatically.
+  var REPO = "";
+
+  var LANGS = [
+    { key: "french", name: "French", native: "Français · Французский", tab: "--tab-fr", junior: "French Junior", general: "Français Général" },
+    { key: "english", name: "English", native: "English · Английский", tab: "--tab-en", junior: "English Junior", general: "General English" },
+    { key: "russian", name: "Russian", native: "Русский", tab: "--tab-ru", junior: "Russian Junior", general: "General Russian" },
+    { key: "spanish", name: "Spanish", native: "Español · Испанский", tab: "--tab-es", junior: "Spanish Junior", general: "General Spanish" }
+  ];
+  var LEVELS = ["Level 1", "Level 2", "Level 3", "Level 4"];
+  var CACHE_KEY = "library-files-v1", CACHE_MS = 10 * 60 * 1000;
+
+  var app = document.getElementById("app");
+  var items = [], query = "";
+
+  function repoName() {
+    if (REPO) return REPO;
+    var host = location.hostname, m = host.match(/^([^.]+)\.github\.io$/i);
+    if (!m) return "";
+    var first = location.pathname.split("/").filter(Boolean)[0];
+    return m[1] + "/" + (first && !/\.html?$/i.test(first) ? first : host);
+  }
+  function langOf(k) { for (var i = 0; i < LANGS.length; i++) if (LANGS[i].key === k) return LANGS[i]; return null; }
+  function placeLabel(p) {
+    var s = p.split("/"), l = langOf(s[0]); if (!l) return p;
+    return s[1] === "junior" ? l.junior : l.general + " · " + LEVELS[Number(s[2].replace("level-", "")) - 1];
+  }
+  function inPlace(p) { return items.filter(function (i) { return i.place === p; }).sort(function (a, b) { return a.title.localeCompare(b.title, undefined, { numeric: true }); }); }
+  function underPrefix(p) { return items.filter(function (i) { return i.place.indexOf(p) === 0; }).length; }
+  function files(n) { return n === 1 ? "1 PDF" : n + " PDFs"; }
+  function size(b) { return !b ? "" : b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB"; }
+
+  function el(tag, attrs) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) if (attrs[k] != null && attrs[k] !== false) n.setAttribute(k, attrs[k]);
+    for (var i = 2; i < arguments.length; i++) {
+      var c = arguments[i]; if (c == null || c === false) continue;
+      [].concat(c).forEach(function (x) { if (x != null) n.appendChild(x.nodeType ? x : document.createTextNode(String(x))); });
+    }
+    return n;
+  }
+
+  // Load the list of PDFs from the repository's folders (materials/<language>/junior or general/level-N).
+  function load(force) {
+    var repo = repoName();
+    if (!repo) return Promise.resolve(fromLocalFile());
+    if (!force) {
+      try {
+        var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+        if (c && c.repo === repo && Date.now() - c.at < CACHE_MS) return Promise.resolve(c.items);
+      } catch (e) {}
+    }
+    return fetch("https://api.github.com/repos/" + repo + "/git/trees/HEAD?recursive=1", { headers: { Accept: "application/vnd.github+json" } })
+      .then(function (r) { if (!r.ok) throw new Error("status " + r.status); return r.json(); })
+      .then(function (data) {
+        var list = (data.tree || []).filter(function (t) { return t.type === "blob" && /^materials\/.+\.pdf$/i.test(t.path); }).map(function (t) {
+          var parts = t.path.split("/"), file = parts.pop();
+          return { path: t.path, place: parts.slice(1).join("/"), title: file.replace(/\.pdf$/i, "").replace(/[_]+/g, " ").trim(), size: t.size };
+        });
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ repo: repo, at: Date.now(), items: list })); } catch (e) {}
+        return list;
+      })
+      .catch(function (err) {
+        try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); if (c && c.repo === repo) return c.items; } catch (e) {}
+        throw err;
+      });
+  }
+  function fromLocalFile() { return []; }
+
+  function route() {
+    var h = decodeURIComponent(location.hash.replace(/^#\/?/, "")).split("/").filter(Boolean);
+    return { lang: h[0] || null, section: h[1] || null, level: h[2] || null };
+  }
+  function link(label, hash) { return el("a", { href: "#" + hash }, label); }
+
+  function crumbs(r, l) {
+    var parts = [["Home", ""]];
+    parts.push([l.name, l.key]);
+    if (r.section === "general") parts.push([l.general, l.key + "/general"]);
+    if (r.section === "junior") parts.push([l.junior, null]);
+    if (r.level) parts.push([LEVELS[Number(r.level.replace("level-", "")) - 1] || r.level, null]);
+    var nav = el("nav", { class: "crumbs", "aria-label": "Breadcrumb" });
+    parts.forEach(function (p, i) {
+      if (i) nav.appendChild(el("span", { class: "sep", "aria-hidden": "true" }, "/"));
+      nav.appendChild(i === parts.length - 1 ? el("span", { class: "here", "aria-current": "page" }, p[0]) : link(p[0], p[1]));
+    });
+    return nav;
+  }
+  function card(hash, tab, kids) { return el("a", { class: "card", href: "#" + hash, style: "--tab: var(" + tab + ")" }, kids); }
+  function pdfUrl(path) { return path.split("/").map(encodeURIComponent).join("/"); }
+
+  function row(item, showWhere) {
+    var l = langOf(item.place.split("/")[0]);
+    return el("div", { class: "row", style: "--tab: var(" + (l ? l.tab : "--accent") + ")" },
+      el("span", { class: "ico", "aria-hidden": "true" }, "PDF"),
+      el("div", { class: "info" }, el("span", { class: "title" }, item.title),
+        showWhere ? el("span", { class: "where" }, placeLabel(item.place)) : null,
+        item.size ? el("span", { class: "meta" }, size(item.size)) : null),
+      el("div", { class: "acts" },
+        el("a", { class: "btn", href: pdfUrl(item.path), target: "_blank", rel: "noopener" }, "Open"),
+        el("a", { class: "btn primary", href: pdfUrl(item.path), download: item.path.split("/").pop() }, "Download")));
+  }
+
+  function render() {
+    app.innerHTML = "";
+    var r = route(), l = langOf(r.lang);
+    if (!l) {
+      app.appendChild(el("header", { class: "top" }, el("span", { class: "eyebrow" }, "Course materials"),
+        el("h1", null, "Language Materials Library"),
+        el("p", { class: "lede" }, "Choose a language, then a section and level to open or download the PDFs.")));
+      var input = el("input", { type: "search", id: "search", placeholder: "Search all PDFs / Поиск", "aria-label": "Search all PDFs", value: query });
+      input.addEventListener("input", function () { query = input.value; results(); });
+      app.appendChild(el("div", { class: "search" }, input));
+      app.appendChild(el("div", { id: "results" }));
+      results();
+      return;
+    }
+    app.appendChild(crumbs(r, l));
+    if (!r.section) {
+      app.appendChild(el("h2", null, l.name + " · " + l.native));
+      app.appendChild(el("div", { class: "grid two" },
+        card(l.key + "/junior", l.tab, [el("span", { class: "name" }, l.junior), el("span", { class: "native" }, "For younger learners"), el("span", { class: "count" }, files(underPrefix(l.key + "/junior")))]),
+        card(l.key + "/general", l.tab, [el("span", { class: "name" }, l.general), el("span", { class: "native" }, LEVELS.length + " levels"), el("span", { class: "count" }, files(underPrefix(l.key + "/general/")))])));
+    } else if (r.section === "general" && !r.level) {
+      app.appendChild(el("h2", null, l.general));
+      app.appendChild(el("div", { class: "grid" }, LEVELS.map(function (name, i) {
+        var p = l.key + "/general/level-" + (i + 1);
+        return card(p, l.tab, [el("span", { class: "levelnum", "aria-hidden": "true" }, String(i + 1)), el("span", { class: "name" }, name), el("span", { class: "count" }, files(inPlace(p).length))]);
+      })));
+    } else {
+      var place = r.section === "junior" ? l.key + "/junior" : l.key + "/general/" + r.level;
+      app.appendChild(el("h2", null, placeLabel(place)));
+      var list = el("div", { class: "list" }), found = inPlace(place);
+      if (found.length) found.forEach(function (it) { list.appendChild(row(it, false)); });
+      else list.appendChild(el("div", { class: "empty" }, "No PDFs here yet. Check back soon."));
+      app.appendChild(list);
+    }
+  }
+
+  function results() {
+    var box = document.getElementById("results"); if (!box) return;
+    box.innerHTML = "";
+    var q = query.trim().toLowerCase();
+    if (!q) {
+      box.appendChild(el("div", { class: "grid" }, LANGS.map(function (l) {
+        var n = underPrefix(l.key + "/");
+        return card(l.key, l.tab, [el("span", { class: "name" }, l.name), el("span", { class: "native" }, l.native), el("span", { class: "count" }, n ? files(n) : "Coming soon")]);
+      })));
+      return;
+    }
+    var hits = items.filter(function (i) { return (i.title + " " + placeLabel(i.place)).toLowerCase().indexOf(q) >= 0; });
+    var list = el("div", { class: "list" });
+    if (hits.length) hits.forEach(function (h) { list.appendChild(row(h, true)); });
+    else list.appendChild(el("div", { class: "empty" }, "No PDFs match “" + query.trim() + "”."));
+    box.appendChild(list);
+  }
+
+  function start(force) {
+    load(force).then(function (list) { items = list; render(); }).catch(function () {
+      app.innerHTML = "";
+      var retry = el("button", { class: "btn primary", type: "button" }, "Try again");
+      retry.addEventListener("click", function () { app.innerHTML = '<p class="empty">Loading…</p>'; start(true); });
+      app.appendChild(el("div", { class: "empty err" }, el("p", null, "The list of materials could not load. Check your internet connection and try again."), retry));
+    });
+  }
+  window.addEventListener("hashchange", function () { render(); window.scrollTo(0, 0); });
+  start(false);
+})();
+</script>
+</body>
+</html>
